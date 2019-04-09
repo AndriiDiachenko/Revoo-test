@@ -1,4 +1,4 @@
-import re
+from lenovo_product_page import ProductPage as pp
 
 class RevooPopup():
     def __init__(self, driver):
@@ -6,16 +6,6 @@ class RevooPopup():
 
     # We are using CSS locators
     page_locators = {
-        'Prod_reviews': "div.reviews div.prodReview",
-        'small_iframe': {
-            'element': 'iframe[title*="Reviews"]',
-            'review_module': 'div[data-reevoo-action="reviews"]',
-            'review_rating_element': ' div[data-reevoo-action="reviews"] \
-            div[class="reevoo__position--left"] reevoo-score', # get atribute data-score
-
-            'reviews_number': 'div[class="reevoo__position--right"] div.reevoo__section--number-of-reviews', # Get text
-            'ask_owner': 'div[data-reevoo-action="ask_an_owner"]'
-        },
         'custome_revoews':{
             'iframe': 'iframe[title="CUSTOMER REVIEWS"]',
             'custome_review': 'a[id="reviews-tab-content-link"]',
@@ -31,25 +21,26 @@ class RevooPopup():
         }
     }
 
-    def get_product_rating(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
-        r = self.driver.find_elemnt_by_css_selector(self.page_locators['small_iframe']['review_rating_element'])
-        return r.get_attribute('data-score')
 
-    def get_total_reviews_number(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
-        total_reviews = self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['reviews_number'])
 
-        # re fro regular expression , get only numbers
-        return re.findall('\d+', total_reviews)
-
-    def open_reviews_popup(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
+    def open_custom_reviews_popup(self):
+        self.driver.switch_to.frame(pp.page_locators['small_iframe'])
         self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['review_module']).click()
         self.driver.switch_to.frame(self.page_locators['custome_revoews']['iframe'])
 
     def open_ask_owner_popup(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
+        self.driver.switch_to.frame(pp.page_locators['small_iframe'])
         self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['ask_owner']).click()
         self.driver.switch_to.frame(self.page_locators['ask_owner']['iframe'])
+
+    def custom_reviews_scores_table(self):
+        self.driver.switch_to.frame(self.page_locators['custome_revoews']['iframe'])
+        scores = self.driver.find_elements_by_css_selector(self.page_locators['custome_revoews']['scores'])
+        score_dict = {}
+        for score in scores:
+            score_title = score.find_element_by_css_selector('th[scope="row"]').text
+            score_vale = score.find_element_by_css_selector('td[data-score]').get_attribute('data-score')
+            score_dict[score_title] = score_vale
+
+
 
