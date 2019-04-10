@@ -11,10 +11,10 @@ class ProductPage():
         'small_iframe': {
             'element': 'iframe[title*="Reviews"]',
             'review_module': 'div[data-reevoo-action="reviews"]',
-            'review_rating_element': ' div[data-reevoo-action="reviews"] \
+            'review_rating_element': 'div[data-reevoo-action="reviews"] \
         div[class="reevoo__position--left"] reevoo-score',  # get atribute data-score
-
-            'reviews_number': 'div[class="reevoo__position--right"] div.reevoo__section--number-of-reviews',  # Get text
+            'reviews_number': 'div[data-reevoo-action="reviews"] \
+             div[class="reevoo__position--right"] div[class="reevoo__section--number-of-reviews"]',  # Get text
             'ask_owner': 'div[data-reevoo-action="ask_an_owner"]'
         }
     }
@@ -23,13 +23,16 @@ class ProductPage():
         return self.driver.find_element_by_css_selector(self.page_locators['prod_reviews'])
 
     def get_product_rating(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
-        r = self.driver.find_elemnt_by_css_selector(self.page_locators['small_iframe']['review_rating_element'])
+        self.driver.switch_to.default_content()
+        self.driver.switch_to.frame(self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['element']))
+        r = self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['review_rating_element'])
         return r.get_attribute('data-score')
 
     def get_total_reviews_number(self):
-        self.driver.switch_to.frame(self.page_locators['small_iframe'])
+        self.driver.switch_to.default_content()
+        self.driver.switch_to.frame(self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['element']))
         total_reviews = self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['reviews_number'])
-
+        print(total_reviews)
         # re fro regular expression , get only numbers
-        return re.findall('\d+', total_reviews.text)
+        reviews_count = re.findall(r'\d+', total_reviews.text)[0]
+        return int(reviews_count)
