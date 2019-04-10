@@ -72,7 +72,7 @@ class TestProductPage():
                                               'Value for money',
                                               'Overall rating'])
     def test_custome_review_scores_eq_to_progress(self, score_params):
-
+        pass
 
     def test_open_ask_owner_popup(self):
         pass
