@@ -32,7 +32,6 @@ class ProductPage():
         self.driver.switch_to.default_content()
         self.driver.switch_to.frame(self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['element']))
         total_reviews = self.driver.find_element_by_css_selector(self.page_locators['small_iframe']['reviews_number'])
-        print(total_reviews)
         # re fro regular expression , get only numbers
         reviews_count = re.findall(r'\d+', total_reviews.text)[0]
         return int(reviews_count)

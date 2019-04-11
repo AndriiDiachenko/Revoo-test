@@ -11,14 +11,14 @@ class TestProductPage():
     def setup(self):
         new_driver = startdriver.StartDriver()
         self.driver = new_driver.start()
-        self.driver.implicitly_wait(15)
+        self.driver.implicitly_wait(5)
         self.driver.get(self.start_page)
 
     def teardown(self):
         self.driver.quit()
 
     @allure.feature('Find small elements on page Rating')
-    def test_find_revoo_rating_small_bnt(self):
+    def test_find_reevoo_rating_small_bnt(self):
         with allure.step('Find Rating module on the page'):
             small_module = lenovo_product_page.ProductPage(self.driver).get_small_module_elements()
         with allure.step('Check module is visible for users'):
@@ -65,14 +65,34 @@ class TestProductPage():
             assert page_reviews == popup_reviews
 
     @allure.feature('Check scores')
-    @pytest.mark.parametrize('score_params', ['Battery life',
+    @pytest.mark.parametrize('score_params_names', ['Battery life',
                                               'Design',
                                               'Size and weight',
                                               'Performance',
                                               'Value for money',
                                               'Overall rating'])
-    def test_custome_review_scores_eq_to_progress(self, score_params):
-        pass
+    def test_customer_review_scores_is_available(self, score_params_names):
+        with allure.step('Make test preparation process'):
+            lenovo_popup.RevooPopup(self.driver).open_custom_reviews_popup()
+            lenovo_popup.RevooPopup(self.driver).switch_to_customer_reviews_popup()
+        with allure.step('Get List of scores with Score Name, Value and Element'):
+            score_list = lenovo_popup.RevooPopup(self.driver).custom_reviews_scores_table()
+        with allure.step('Check if score "%s" available' % score_params_names):
+            assert len(score_list) > 0
+            assert score_params_names in [next(iter(i)) for i in score_list]
+        with allure.step('Check if score "%s" has values and Not = 0' % score_params_names):
+            assert [float(x[score_params_names]) for x in score_list if score_params_names in x.keys()][0] != 0
 
-    def test_open_ask_owner_popup(self):
-        pass
+
+    def test_customer_review_total_rating_calculates_correctly(self):
+        with allure.step('Make test preparation process'):
+            page_score = lenovo_product_page.ProductPage(self.driver).get_product_rating()
+            lenovo_popup.RevooPopup(self.driver).open_custom_reviews_popup()
+            lenovo_popup.RevooPopup(self.driver).switch_to_customer_reviews_popup()
+        with allure.step('Get List of scores with Score Name, Value and Element'):
+            score_list = lenovo_popup.RevooPopup(self.driver).custom_reviews_scores_table()
+            score_values = [float(score[next(iter(score))]) for score in score_list if 'Overall rating' not in score.keys()]
+            calc_score = (sum(score_values) / len(score_values))
+            assert float(page_score) == round(calc_score, 1)
+
+
